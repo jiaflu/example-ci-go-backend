@@ -1,0 +1,6 @@
+dist/
+reports/
+.cache/
+coverage.out
+.env
+.DS_Store

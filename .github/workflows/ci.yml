@@ -1,0 +1,61 @@
+name: Go Backend CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Format, Vet, Test, Coverage, Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Check formatting
+        run: |
+          test -z "$(gofmt -l .)"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run tests with coverage
+        run: |
+          mkdir -p reports
+          go test ./...
+          go test ./internal/... -covermode=atomic -coverprofile=reports/coverage.out
+          go tool cover -func=reports/coverage.out
+
+      - name: Enforce coverage threshold
+        run: go run ./scripts/coverage-check.go reports/coverage.out 80
+
+      - name: Run race detector
+        run: go test -race ./...
+
+      - name: Build server binary
+        run: |
+          mkdir -p dist
+          go build -o dist/example-ci-go-backend ./cmd/server
+
+      - name: Upload CI reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            reports/coverage.out
+            dist/example-ci-go-backend
