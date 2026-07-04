@@ -97,17 +97,62 @@
       }
 
       .pipeline {
+        position: relative;
         padding: 22px;
       }
 
       .grid {
+        position: relative;
+        z-index: 2;
         display: grid;
         grid-template-columns: repeat(4, minmax(150px, 1fr));
+        grid-template-areas:
+          "s1 s2 s3 s4"
+          "s8 s7 s6 s5"
+          "s9 s10 s11 s12";
         gap: 18px 16px;
+      }
+
+      .flow-lines {
+        position: absolute;
+        inset: 22px;
+        z-index: 1;
+        width: calc(100% - 44px);
+        height: calc(100% - 44px);
+        pointer-events: none;
+      }
+
+      .flow-lines path {
+        fill: none;
+        stroke: rgba(37, 99, 235, 0.45);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 12 10;
+        animation: dash 1.8s linear infinite;
+      }
+
+      .flow-arrow {
+        position: absolute;
+        z-index: 4;
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        border: 1px solid #bfdbfe;
+        border-radius: 50%;
+        background: #eff6ff;
+        color: var(--blue);
+        font-size: 15px;
+        font-weight: 900;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16);
+        animation: arrow-pop 12s linear infinite;
+        animation-delay: calc(var(--i) * 0.65s);
       }
 
       .step {
         position: relative;
+        z-index: 2;
         min-height: 92px;
         border: 1px solid var(--border);
         border-radius: 8px;
@@ -116,6 +161,54 @@
         overflow: hidden;
         animation: activate 12s linear infinite;
         animation-delay: calc(var(--i) * 0.65s);
+      }
+
+      .step:nth-child(1) {
+        grid-area: s1;
+      }
+
+      .step:nth-child(2) {
+        grid-area: s2;
+      }
+
+      .step:nth-child(3) {
+        grid-area: s3;
+      }
+
+      .step:nth-child(4) {
+        grid-area: s4;
+      }
+
+      .step:nth-child(5) {
+        grid-area: s5;
+      }
+
+      .step:nth-child(6) {
+        grid-area: s6;
+      }
+
+      .step:nth-child(7) {
+        grid-area: s7;
+      }
+
+      .step:nth-child(8) {
+        grid-area: s8;
+      }
+
+      .step:nth-child(9) {
+        grid-area: s9;
+      }
+
+      .step:nth-child(10) {
+        grid-area: s10;
+      }
+
+      .step:nth-child(11) {
+        grid-area: s11;
+      }
+
+      .step:nth-child(12) {
+        grid-area: s12;
       }
 
       .step::after {
@@ -257,6 +350,28 @@
         }
       }
 
+      @keyframes dash {
+        to {
+          stroke-dashoffset: -22;
+        }
+      }
+
+      @keyframes arrow-pop {
+        0%,
+        6% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+        8%,
+        14% {
+          transform: translate(-50%, -50%) scale(1.16);
+          background: #dbeafe;
+        }
+        20%,
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
       @media (max-width: 900px) {
         main {
           width: min(100vw - 28px, 720px);
@@ -274,6 +389,27 @@
 
         .grid {
           grid-template-columns: 1fr;
+          grid-template-areas:
+            "s1"
+            "s2"
+            "s3"
+            "s4"
+            "s5"
+            "s6"
+            "s7"
+            "s8"
+            "s9"
+            "s10"
+            "s11"
+            "s12";
+        }
+
+        .flow-lines {
+          display: none;
+        }
+
+        .flow-arrow {
+          display: none;
         }
 
         .outputs {
@@ -294,6 +430,35 @@
 
       <section class="layout" aria-label="CI pipeline visualization">
         <div class="pipeline">
+          <svg class="flow-lines" viewBox="0 0 1000 330" role="img" aria-label="Animated CI flow arrows">
+            <defs>
+              <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(37, 99, 235, 0.62)"></path>
+              </marker>
+            </defs>
+            <path marker-end="url(#arrowhead)" d="M 235 55 H 305"></path>
+            <path marker-end="url(#arrowhead)" d="M 485 55 H 555"></path>
+            <path marker-end="url(#arrowhead)" d="M 735 55 H 805"></path>
+            <path marker-end="url(#arrowhead)" d="M 880 94 V 126"></path>
+            <path marker-end="url(#arrowhead)" d="M 805 165 H 735"></path>
+            <path marker-end="url(#arrowhead)" d="M 555 165 H 485"></path>
+            <path marker-end="url(#arrowhead)" d="M 305 165 H 235"></path>
+            <path marker-end="url(#arrowhead)" d="M 120 204 V 236"></path>
+            <path marker-end="url(#arrowhead)" d="M 235 275 H 305"></path>
+            <path marker-end="url(#arrowhead)" d="M 485 275 H 555"></path>
+            <path marker-end="url(#arrowhead)" d="M 735 275 H 805"></path>
+          </svg>
+          <span class="flow-arrow" style="--i: 0; left: 25.3%; top: 17%;">&rarr;</span>
+          <span class="flow-arrow" style="--i: 1; left: 49.2%; top: 17%;">&rarr;</span>
+          <span class="flow-arrow" style="--i: 2; left: 73.1%; top: 17%;">&rarr;</span>
+          <span class="flow-arrow" style="--i: 3; left: 96%; top: 34%;">&darr;</span>
+          <span class="flow-arrow" style="--i: 4; left: 73.1%; top: 50%;">&larr;</span>
+          <span class="flow-arrow" style="--i: 5; left: 49.2%; top: 50%;">&larr;</span>
+          <span class="flow-arrow" style="--i: 6; left: 25.3%; top: 50%;">&larr;</span>
+          <span class="flow-arrow" style="--i: 7; left: 5.5%; top: 61%;">&darr;</span>
+          <span class="flow-arrow" style="--i: 8; left: 25.3%; top: 83%;">&rarr;</span>
+          <span class="flow-arrow" style="--i: 9; left: 49.2%; top: 83%;">&rarr;</span>
+          <span class="flow-arrow" style="--i: 10; left: 73.1%; top: 83%;">&rarr;</span>
           <div class="grid">
             <article class="step" style="--i: 0">
               <span class="num">1</span>
