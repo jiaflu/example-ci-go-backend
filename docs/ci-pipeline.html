@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Go Backend CI Pipeline</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --ink: #172033;
+        --muted: #657084;
+        --line: #c8d3e1;
+        --panel: #ffffff;
+        --green: #15803d;
+        --blue: #2563eb;
+        --amber: #b45309;
+        --border: #d9e2ef;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(1180px, calc(100vw - 48px));
+        margin: 0 auto;
+        padding: 42px 0;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 32px;
+        line-height: 1.12;
+      }
+
+      .subtitle {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #bbf7d0;
+        border-radius: 999px;
+        background: #f0fdf4;
+        color: #166534;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 8px 12px;
+        white-space: nowrap;
+      }
+
+      .badge::before {
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.14);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .pipeline,
+      .outputs {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+      }
+
+      .pipeline {
+        padding: 22px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: 18px 16px;
+      }
+
+      .step {
+        position: relative;
+        min-height: 92px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fbfdff;
+        padding: 14px;
+        overflow: hidden;
+        animation: activate 12s linear infinite;
+        animation-delay: calc(var(--i) * 0.65s);
+      }
+
+      .step::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent, rgba(37, 99, 235, 0.11), transparent);
+        transform: translateX(-120%);
+        animation: sweep 12s linear infinite;
+        animation-delay: calc(var(--i) * 0.65s);
+      }
+
+      .num {
+        display: inline-grid;
+        place-items: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #eef4ff;
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .step h2 {
+        margin: 11px 0 4px;
+        font-size: 15px;
+        line-height: 1.2;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .gate {
+        border-color: #fde68a;
+        background: #fffbeb;
+      }
+
+      .gate .num {
+        background: #fef3c7;
+        color: var(--amber);
+      }
+
+      .container {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+      }
+
+      .outputs {
+        padding: 20px;
+      }
+
+      .outputs h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      .artifact {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 11px 12px;
+        margin-bottom: 10px;
+        background: #fbfdff;
+        animation: pulse 12s linear infinite;
+        animation-delay: calc(var(--i) * 0.75s);
+      }
+
+      .artifact strong {
+        display: block;
+        font-size: 13px;
+      }
+
+      .artifact span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @keyframes activate {
+        0%,
+        6% {
+          border-color: var(--border);
+          box-shadow: none;
+          transform: translateY(0);
+        }
+        8%,
+        14% {
+          border-color: #60a5fa;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+          transform: translateY(-2px);
+        }
+        20%,
+        100% {
+          border-color: var(--border);
+          box-shadow: none;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes sweep {
+        0%,
+        8% {
+          transform: translateX(-120%);
+        }
+        14% {
+          transform: translateX(120%);
+        }
+        100% {
+          transform: translateX(120%);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        62% {
+          border-color: var(--border);
+          background: #fbfdff;
+        }
+        66%,
+        72% {
+          border-color: #86efac;
+          background: #f0fdf4;
+        }
+        78%,
+        100% {
+          border-color: var(--border);
+          background: #fbfdff;
+        }
+      }
+
+      @media (max-width: 900px) {
+        main {
+          width: min(100vw - 28px, 720px);
+          padding: 24px 0;
+        }
+
+        header,
+        .layout {
+          display: block;
+        }
+
+        .badge {
+          margin-top: 16px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .outputs {
+          margin-top: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Go Backend CI Pipeline</h1>
+          <p class="subtitle">Automated quality gate for tests, coverage, binary build, and container image validation.</p>
+        </div>
+        <div class="badge">CI quality gate</div>
+      </header>
+
+      <section class="layout" aria-label="CI pipeline visualization">
+        <div class="pipeline">
+          <div class="grid">
+            <article class="step" style="--i: 0">
+              <span class="num">1</span>
+              <h2>Trigger</h2>
+              <p>Pull request or push to main starts the workflow.</p>
+            </article>
+            <article class="step" style="--i: 1">
+              <span class="num">2</span>
+              <h2>Go setup</h2>
+              <p>Checkout, Go 1.22, and module cache.</p>
+            </article>
+            <article class="step" style="--i: 2">
+              <span class="num">3</span>
+              <h2>Format</h2>
+              <p>gofmt check blocks unformatted code.</p>
+            </article>
+            <article class="step" style="--i: 3">
+              <span class="num">4</span>
+              <h2>Static checks</h2>
+              <p>go vet catches common correctness issues.</p>
+            </article>
+            <article class="step" style="--i: 4">
+              <span class="num">5</span>
+              <h2>Tests</h2>
+              <p>go test ./... validates all packages.</p>
+            </article>
+            <article class="step gate" style="--i: 5">
+              <span class="num">6</span>
+              <h2>Coverage gate</h2>
+              <p>Coverage reports generated and checked at 80% minimum.</p>
+            </article>
+            <article class="step" style="--i: 6">
+              <span class="num">7</span>
+              <h2>Race check</h2>
+              <p>go test -race checks concurrent safety.</p>
+            </article>
+            <article class="step" style="--i: 7">
+              <span class="num">8</span>
+              <h2>Binary build</h2>
+              <p>Builds the Go backend executable.</p>
+            </article>
+            <article class="step container" style="--i: 8">
+              <span class="num">9</span>
+              <h2>Buildx</h2>
+              <p>QEMU and Buildx prepare multi-arch builds.</p>
+            </article>
+            <article class="step container" style="--i: 9">
+              <span class="num">10</span>
+              <h2>Docker image</h2>
+              <p>Builds linux/amd64 and linux/arm64 container image.</p>
+            </article>
+            <article class="step container" style="--i: 10">
+              <span class="num">11</span>
+              <h2>Registry placeholder</h2>
+              <p>Push step is present but disabled until registry exists.</p>
+            </article>
+            <article class="step" style="--i: 11">
+              <span class="num">12</span>
+              <h2>Artifacts</h2>
+              <p>Reports, binary, and OCI image tar are uploaded.</p>
+            </article>
+          </div>
+        </div>
+
+        <aside class="outputs" aria-label="CI artifacts">
+          <h2>CI Outputs</h2>
+          <div class="artifact" style="--i: 0">
+            <strong>coverage-summary.md</strong>
+            <span>Client-readable coverage result.</span>
+          </div>
+          <div class="artifact" style="--i: 1">
+            <strong>coverage.html</strong>
+            <span>Line-by-line coverage visualization.</span>
+          </div>
+          <div class="artifact" style="--i: 2">
+            <strong>example-ci-go-backend</strong>
+            <span>Linux backend binary.</span>
+          </div>
+          <div class="artifact" style="--i: 3">
+            <strong>image.tar</strong>
+            <span>Multi-architecture OCI image artifact.</span>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        GitHub Actions validates code quality before merge and container readiness before deployment.
+      </footer>
+    </main>
+  </body>
+</html>

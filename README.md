@@ -28,6 +28,12 @@ This project demonstrates a practical CI quality gate for a Go service:
 
 ## Pipeline
 
+Animated page:
+
+[Open the interactive CI pipeline demo](docs/ci-pipeline.html)
+
+![CI pipeline preview](docs/assets/ci-pipeline-preview.png)
+
 ```mermaid
 flowchart TD
     A["Pull Request / Push to main"] --> B["Checkout code"]
