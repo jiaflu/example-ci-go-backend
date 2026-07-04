@@ -1,0 +1,275 @@
+name: CI Demo Cases
+
+on:
+  workflow_dispatch:
+    inputs:
+      demo_case:
+        description: Demo case to run
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - success
+          - failure
+
+permissions:
+  contents: read
+
+jobs:
+  success-case:
+    name: Success Case
+    if: ${{ github.event.inputs.demo_case == 'both' || github.event.inputs.demo_case == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run tests with coverage
+        run: |
+          mkdir -p reports
+          go test ./...
+          go test ./internal/... -covermode=atomic -coverprofile=reports/coverage.out
+          ./scripts/coverage-report.sh reports/coverage.out 80
+
+      - name: Enforce coverage threshold
+        run: go run ./scripts/coverage-check.go reports/coverage.out 80
+
+      - name: Run race detector
+        run: go test -race ./...
+
+      - name: Build server binary
+        run: |
+          mkdir -p dist
+          go build -o dist/example-ci-go-backend ./cmd/server
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build multi-architecture Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: example-ci-go-backend:success-demo-${{ github.sha }}
+          outputs: type=oci,dest=dist/example-ci-go-backend-image.tar
+
+      - name: Registry push placeholder
+        run: |
+          echo "Registry push is intentionally skipped in the success demo."
+          echo "When a registry exists, configure login and set push: true."
+
+      - name: Success demo summary
+        run: |
+          {
+            echo "# Success Case"
+            echo
+            echo "All CI checks completed successfully."
+            echo
+            echo "| Stage | Result |"
+            echo "| --- | --- |"
+            echo "| Format | PASS |"
+            echo "| Vet | PASS |"
+            echo "| Tests | PASS |"
+            echo "| Coverage | PASS |"
+            echo "| Race detector | PASS |"
+            echo "| Binary build | PASS |"
+            echo "| Multi-arch Docker image | PASS |"
+            echo "| Registry push placeholder | SKIPPED |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload success demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: success-demo-artifacts
+          path: |
+            reports/coverage.out
+            reports/coverage.txt
+            reports/coverage.html
+            reports/coverage-summary.md
+            dist/example-ci-go-backend
+            dist/example-ci-go-backend-image.tar
+
+  failure-case:
+    name: Failure Case
+    if: ${{ github.event.inputs.demo_case == 'both' || github.event.inputs.demo_case == 'failure' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Prepare failure demo workspace
+        run: mkdir -p demo-failures reports dist
+
+      - name: Formatting failure demo
+        id: format
+        continue-on-error: true
+        run: |
+          cat > demo-failures/bad-format.go <<'GO'
+          package main
+          func main(){println("bad formatting")}
+          GO
+          test -z "$(gofmt -l demo-failures/bad-format.go)"
+
+      - name: Vet failure demo
+        id: vet
+        continue-on-error: true
+        run: |
+          mkdir -p demo-failures/vet
+          cat > demo-failures/vet/go.mod <<'GO'
+          module vet-failure-demo
+
+          go 1.22
+          GO
+          cat > demo-failures/vet/main.go <<'GO'
+          package main
+
+          import "fmt"
+
+          func main() {
+          	fmt.Printf("%d", "not-a-number")
+          }
+          GO
+          cd demo-failures/vet
+          go vet .
+
+      - name: Test failure demo
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p demo-failures/tests
+          cat > demo-failures/tests/go.mod <<'GO'
+          module test-failure-demo
+
+          go 1.22
+          GO
+          cat > demo-failures/tests/main_test.go <<'GO'
+          package main
+
+          import "testing"
+
+          func TestIntentionalFailure(t *testing.T) {
+          	t.Fatal("intentional test failure for CI demo")
+          }
+          GO
+          cd demo-failures/tests
+          go test .
+
+      - name: Coverage threshold failure demo
+        id: coverage
+        continue-on-error: true
+        run: |
+          go test ./internal/... -covermode=atomic -coverprofile=reports/failure-coverage.out
+          go run ./scripts/coverage-check.go reports/failure-coverage.out 101
+
+      - name: Race detector failure demo
+        id: race
+        continue-on-error: true
+        run: |
+          mkdir -p demo-failures/race
+          cat > demo-failures/race/go.mod <<'GO'
+          module race-failure-demo
+
+          go 1.22
+          GO
+          cat > demo-failures/race/race_test.go <<'GO'
+          package racefail
+
+          import "testing"
+
+          func TestIntentionalRace(t *testing.T) {
+          	var value int
+          	done := make(chan bool)
+          	go func() {
+          		for i := 0; i < 100000; i++ {
+          			value = i
+          		}
+          		done <- true
+          	}()
+          	for i := 0; i < 100000; i++ {
+          		_ = value
+          	}
+          	<-done
+          }
+          GO
+          cd demo-failures/race
+          go test -race .
+
+      - name: Binary build failure demo
+        id: binary
+        continue-on-error: true
+        run: go build -o dist/missing ./cmd/does-not-exist
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker image build failure demo
+        id: docker_image
+        continue-on-error: true
+        run: |
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --file demo-failures/missing.Dockerfile \
+            --tag example-ci-go-backend:failure-demo \
+            .
+
+      - name: Registry push failure demo
+        id: registry
+        continue-on-error: true
+        run: |
+          echo "::error::Registry push failed because no registry credentials are configured."
+          exit 1
+
+      - name: Failure demo summary
+        if: always()
+        run: |
+          {
+            echo "# Failure Case"
+            echo
+            echo "This job intentionally keeps running after failed checks so the full failure surface is visible."
+            echo
+            echo "| Stage | Outcome | Why it failed |"
+            echo "| --- | --- | --- |"
+            echo "| Format | ${{ steps.format.outcome }} | Unformatted Go source |"
+            echo "| Vet | ${{ steps.vet.outcome }} | Invalid printf format/type pairing |"
+            echo "| Tests | ${{ steps.tests.outcome }} | Intentional failing test |"
+            echo "| Coverage | ${{ steps.coverage.outcome }} | Required 101% coverage |"
+            echo "| Race detector | ${{ steps.race.outcome }} | Intentional data race |"
+            echo "| Binary build | ${{ steps.binary.outcome }} | Missing package path |"
+            echo "| Docker image | ${{ steps.docker_image.outcome }} | Missing Dockerfile |"
+            echo "| Registry push | ${{ steps.registry.outcome }} | Missing registry credentials |"
+            echo
+            echo "Final result is failed on purpose after all demo steps have run."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1

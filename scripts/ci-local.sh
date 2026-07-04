@@ -2,7 +2,9 @@
 set -eu
 
 mkdir -p .cache/go-build
+mkdir -p .cache/go-mod
 export GOCACHE="$PWD/.cache/go-build"
+export GOMODCACHE="$PWD/.cache/go-mod"
 
 echo "checking gofmt"
 unformatted="$(gofmt -l .)"

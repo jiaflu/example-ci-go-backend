@@ -139,6 +139,19 @@ It runs on:
 - pull requests
 - pushes to `main`
 
+Manual demo cases are defined in:
+
+- `.github/workflows/ci-demo-cases.yml`
+
+Use this workflow to demonstrate:
+
+- a fully successful CI run
+- a failure run where each failed step continues so the whole failure surface is visible
+
+Details:
+
+- [CI demo cases](docs/ci-demo-cases.md)
+
 ## Client Value
 
 This repository demonstrates that I can set up a maintainable CI workflow for a Go backend, including fast feedback, test coverage, build verification, and reviewable CI artifacts.
