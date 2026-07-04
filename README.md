@@ -19,6 +19,7 @@ This project demonstrates a practical CI quality gate for a Go service:
 - Unit tests
 - Race detector test run
 - Coverage profile generation
+- Client-readable coverage reports
 - Coverage threshold enforcement
 - Binary build validation
 - CI artifact upload
@@ -41,6 +42,8 @@ go vet
 unit tests with coverage
    |
 coverage threshold
+   |
+coverage reports
    |
 race detector
    |

@@ -39,7 +39,7 @@ jobs:
           mkdir -p reports
           go test ./...
           go test ./internal/... -covermode=atomic -coverprofile=reports/coverage.out
-          go tool cover -func=reports/coverage.out
+          ./scripts/coverage-report.sh reports/coverage.out 80
 
       - name: Enforce coverage threshold
         run: go run ./scripts/coverage-check.go reports/coverage.out 80
@@ -58,4 +58,7 @@ jobs:
           name: ci-reports
           path: |
             reports/coverage.out
+            reports/coverage.txt
+            reports/coverage.html
+            reports/coverage-summary.md
             dist/example-ci-go-backend
