@@ -28,37 +28,44 @@ This project demonstrates a practical CI quality gate for a Go service:
 
 ## Pipeline
 
-```text
-Pull Request
-   |
-checkout
-   |
-setup Go
-   |
-download modules
-   |
-format check
-   |
-go vet
-   |
-unit tests with coverage
-   |
-coverage threshold
-   |
-coverage reports
-   |
-race detector
-   |
-build backend binary
-   |
-setup QEMU and Docker Buildx
-   |
-build multi-architecture Docker image
-   |
-registry push placeholder
-   |
-upload reports
+```mermaid
+flowchart TD
+    A["Pull Request / Push to main"] --> B["Checkout code"]
+    B --> C["Set up Go 1.22"]
+    C --> D["Download Go modules"]
+    D --> E["Check formatting: gofmt"]
+    E --> F["Static analysis: go vet"]
+    F --> G["Run tests: go test ./..."]
+    G --> H["Generate coverage profile"]
+    H --> I["Generate coverage reports"]
+    I --> J{"Coverage >= 80%?"}
+    J -- "No" --> X["Fail CI"]
+    J -- "Yes" --> K["Run race detector"]
+    K --> L["Build Go binary"]
+    L --> M["Set up QEMU"]
+    M --> N["Set up Docker Buildx"]
+    N --> O["Build multi-architecture Docker image"]
+    O --> P["Registry push placeholder disabled"]
+    P --> Q["Upload CI artifacts"]
+
+    Q --> R["coverage.out"]
+    Q --> S["coverage.txt"]
+    Q --> T["coverage.html"]
+    Q --> U["coverage-summary.md"]
+    Q --> V["Go binary"]
+    Q --> W["OCI image tar"]
 ```
+
+## CI Outputs
+
+| Artifact | Purpose |
+| --- | --- |
+| `coverage.out` | Raw Go coverage profile for tooling |
+| `coverage.txt` | Function-level coverage summary |
+| `coverage.html` | Visual line-by-line coverage report |
+| `coverage-summary.md` | Client-readable coverage result |
+| `example-ci-go-backend` | Linux backend binary |
+| `example-ci-go-backend-image.tar` | Multi-architecture OCI image artifact |
 
 ## Stack
 
