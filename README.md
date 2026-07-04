@@ -22,6 +22,8 @@ This project demonstrates a practical CI quality gate for a Go service:
 - Client-readable coverage reports
 - Coverage threshold enforcement
 - Binary build validation
+- Multi-architecture Docker image build validation
+- Registry push placeholder for future delivery workflows
 - CI artifact upload
 
 ## Pipeline
@@ -49,6 +51,12 @@ race detector
    |
 build backend binary
    |
+setup QEMU and Docker Buildx
+   |
+build multi-architecture Docker image
+   |
+registry push placeholder
+   |
 upload reports
 ```
 
@@ -57,6 +65,7 @@ upload reports
 - Go
 - GitHub Actions
 - Standard library HTTP server
+- Docker / Buildx
 - No runtime third-party dependencies
 
 ## Run Locally
@@ -78,6 +87,33 @@ Open:
 ```bash
 ./scripts/ci-local.sh
 ```
+
+## Docker
+
+Build a local image:
+
+```bash
+docker build -t example-ci-go-backend:local .
+```
+
+Run it:
+
+```bash
+docker run --rm -p 8080:8080 example-ci-go-backend:local
+```
+
+The GitHub Actions workflow validates multi-architecture image builds for:
+
+- `linux/amd64`
+- `linux/arm64`
+
+Because this demo does not use an image registry yet, CI exports the multi-architecture image as an OCI artifact:
+
+```text
+dist/example-ci-go-backend-image.tar
+```
+
+The workflow also includes a disabled registry push placeholder. When a registry is available, that step can be replaced with registry login and `push: true`.
 
 ## GitHub Actions
 

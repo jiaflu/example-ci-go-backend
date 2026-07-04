@@ -9,6 +9,8 @@
 - Coverage profile generation
 - Minimum coverage threshold
 - Backend binary build validation
+- Multi-architecture Docker image build validation
+- OCI image artifact export while registry push is disabled
 - CI artifact upload for review
 
 ## Recommended GitHub Settings
@@ -20,9 +22,8 @@
 
 ## Production Extensions
 
-- Add Docker image build validation
+- Enable image registry push after registry credentials are available
 - Add integration tests with a real database
 - Add vulnerability scanning
 - Add CodeQL
 - Add deployment workflow after CI is stable
-

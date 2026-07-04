@@ -19,6 +19,9 @@ Use this checklist before marking the project complete.
 - [ ] Coverage threshold is enforced, if agreed
 - [ ] Race detector runs, if agreed
 - [ ] Binary or Docker build validation runs, if agreed
+- [ ] Multi-architecture Docker build runs, if container deployment is in scope
+- [ ] OCI image artifact is exported when no registry is available
+- [ ] Registry push is either configured or clearly left as a disabled placeholder
 
 ## Documentation
 
@@ -42,9 +45,9 @@ Delivered:
 - Tests
 - Coverage reporting
 - Build validation
+- Docker image build validation
 - Handoff documentation
 
 Recommended next step:
 
 Enable branch protection so pull requests cannot merge unless the CI workflow passes.
-

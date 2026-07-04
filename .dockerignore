@@ -1,0 +1,7 @@
+.cache/
+.git/
+.github/
+dist/
+reports/
+.DS_Store
+.env

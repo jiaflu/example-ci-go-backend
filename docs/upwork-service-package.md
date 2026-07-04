@@ -6,7 +6,7 @@ I will set up GitHub Actions CI for your Go backend
 
 ## Short Description
 
-I will add a reliable CI pipeline to your Go backend so every pull request is checked before merge. The pipeline can include formatting, `go vet`, unit tests, coverage reporting, coverage threshold enforcement, race detection, build validation, and a short handoff document.
+I will add a reliable CI pipeline to your Go backend so every pull request is checked before merge. The pipeline can include formatting, `go vet`, unit tests, coverage reporting, coverage threshold enforcement, race detection, binary build validation, Docker image build validation, and a short handoff document.
 
 ## Target Buyer
 
@@ -38,6 +38,7 @@ The workflow will show clear pass/fail results for:
 - Coverage
 - Race detection
 - Build validation
+- Docker image build validation
 
 ## Packages
 
@@ -76,6 +77,7 @@ Deliverables:
 - Coverage profile generation
 - Coverage threshold enforcement
 - Race detector run
+- Dockerfile review or Docker image build validation
 - Local CI script
 - Client handoff document
 
@@ -100,6 +102,8 @@ Deliverables:
 - Everything in Standard
 - CI runtime optimization
 - Go module cache setup
+- Multi-architecture Docker image build with Buildx
+- Registry push setup, if registry credentials are available
 - Branch protection recommendations
 - Test/coverage gap notes
 - Follow-up improvement plan
@@ -123,6 +127,7 @@ Included:
 - GitHub Actions CI setup
 - Go test/build pipeline
 - Coverage threshold
+- Dockerfile and image build validation
 - Local CI script
 - Documentation
 
@@ -131,6 +136,7 @@ Not included unless agreed:
 - Production deployment
 - Kubernetes setup
 - Terraform infrastructure
+- Registry setup or paid container registry configuration
 - Database migration redesign
 - Large test suite rewrite
 - Fixing unrelated application bugs
@@ -148,4 +154,6 @@ It includes:
 - Local CI script
 - Coverage threshold enforcement
 - Build artifact generation
-
+- Multi-architecture Docker image build validation
+- OCI image artifact export when no registry is available
+- Disabled registry push placeholder

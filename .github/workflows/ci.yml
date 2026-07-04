@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   ci:
-    name: Format, Vet, Test, Coverage, Build
+    name: Format, Vet, Test, Coverage, Build, Container
     runs-on: ubuntu-latest
 
     steps:
@@ -52,6 +52,29 @@ jobs:
           mkdir -p dist
           go build -o dist/example-ci-go-backend ./cmd/server
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build multi-architecture Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: example-ci-go-backend:ci-${{ github.sha }}
+          outputs: type=oci,dest=dist/example-ci-go-backend-image.tar
+
+      - name: Push Docker image to registry placeholder
+        if: ${{ false }}
+        run: |
+          echo "Registry push is intentionally disabled for this demo."
+          echo "When a registry is available, enable login and set push: true."
+          echo "Example image: ghcr.io/jiaflu/example-ci-go-backend:${GITHUB_SHA}"
+
       - name: Upload CI reports
         uses: actions/upload-artifact@v4
         with:
@@ -62,3 +85,4 @@ jobs:
             reports/coverage.html
             reports/coverage-summary.md
             dist/example-ci-go-backend
+            dist/example-ci-go-backend-image.tar

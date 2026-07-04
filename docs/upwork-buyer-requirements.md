@@ -15,6 +15,8 @@ Send these questions to the client before starting.
 - Does the project require private Go modules?
 - Are there required environment variables for tests?
 - Does the project need a database, Redis, or another service for tests?
+- Is the app deployed as a Docker container?
+- Do you already have a Dockerfile?
 
 ## CI Behavior
 
@@ -23,6 +25,9 @@ Send these questions to the client before starting.
 - Should coverage have a minimum threshold?
 - Should the race detector be included?
 - Should CI build a binary or Docker image?
+- Which image platforms do you need, such as `linux/amd64` or `linux/arm64`?
+- Do you have an image registry, such as GHCR, Docker Hub, ECR, GCR, or ACR?
+- Should registry push be enabled now or left as a placeholder?
 
 ## Delivery
 
@@ -39,4 +44,3 @@ Clarify scope before accepting if:
 - The repo requires secrets the client cannot provide
 - The client expects deployment/CD in the same small CI scope
 - The client wants unrelated application bugs fixed under the CI task
-

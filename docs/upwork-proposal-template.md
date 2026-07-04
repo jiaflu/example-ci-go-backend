@@ -15,6 +15,8 @@ For this project, I would add:
 - optional coverage threshold
 - optional race detector
 - build validation
+- Docker image build validation
+- optional multi-architecture image build
 - short handoff documentation
 
 I have a demo repo showing the same CI structure here:
@@ -42,7 +44,8 @@ My approach would be:
 4. Add formatting and static checks
 5. Run tests with coverage
 6. Add build validation
-7. Document how your team should use and maintain the workflow
+7. Add Docker image build validation if the app is containerized
+8. Document how your team should use and maintain the workflow
 
 If useful, I can also add a local script so developers can run the same checks before pushing.
 
@@ -52,12 +55,14 @@ Relevant demo:
 https://github.com/jiaflu/example-ci-go-backend
 ```
 
-This demo includes a Go backend with CI for formatting, vet, tests, coverage threshold, race detector, binary build, and CI artifacts.
+This demo includes a Go backend with CI for formatting, vet, tests, coverage threshold, race detector, binary build, multi-architecture Docker image build, and CI artifacts.
 
 Questions before starting:
 
 - Which Go version should CI use?
 - Should coverage have a minimum threshold?
+- Do you deploy with Docker, and which architectures do you need?
+- Do you already have an image registry, or should registry push stay disabled for now?
 - Do you want branch protection recommendations after CI is ready?
 
 Best,
@@ -69,6 +74,7 @@ Thanks. Based on that scope, I can deliver:
 
 - GitHub Actions CI workflow
 - Go format/static/test/build checks
+- Docker image build validation
 - Coverage setup
 - Local CI command
 - Handoff notes
@@ -80,4 +86,3 @@ I can complete this in:
 ```
 
 Before I start, I will need repository access and confirmation of the target Go version.
-
