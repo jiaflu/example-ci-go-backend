@@ -29,7 +29,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.26"
           cache: true
 
       - name: Download modules
@@ -123,7 +123,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.26"
           cache: true
 
       - name: Prepare failure demo workspace
@@ -147,7 +147,7 @@ jobs:
           cat > demo-failures/vet/go.mod <<'GO'
           module vet-failure-demo
 
-          go 1.22
+          go 1.26
           GO
           cat > demo-failures/vet/main.go <<'GO'
           package main
@@ -169,7 +169,7 @@ jobs:
           cat > demo-failures/tests/go.mod <<'GO'
           module test-failure-demo
 
-          go 1.22
+          go 1.26
           GO
           cat > demo-failures/tests/main_test.go <<'GO'
           package main
@@ -198,7 +198,7 @@ jobs:
           cat > demo-failures/race/go.mod <<'GO'
           module race-failure-demo
 
-          go 1.22
+          go 1.26
           GO
           cat > demo-failures/race/race_test.go <<'GO'
           package racefail

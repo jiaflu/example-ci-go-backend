@@ -37,7 +37,7 @@ Animated page:
 ```mermaid
 flowchart TD
     A["Pull Request / Push to main"] --> B["Checkout code"]
-    B --> C["Set up Go 1.22"]
+    B --> C["Set up Go 1.26"]
     C --> D["Download Go modules"]
     D --> E["Check formatting: gofmt"]
     E --> F["Static analysis: go vet"]
